@@ -23,7 +23,17 @@ namespace CS321_W5D2_BlogAPI.Core.Services
             //     Use the _userService to get the current users id.
             //     You may have to retrieve the blog in order to check user id
             // TODO: assign the current date to DatePublished
-            return _postRepository.Add(newPost);
+            var currentUserId = _userService.CurrentUserId;
+            var blog = _blogRepository.Get(newPost.BlogId);
+            if (currentUserId == blog.UserId)
+            {
+                newPost.DatePublished = DateTime.Now;
+                return _postRepository.Add(newPost);
+            }
+            else
+            {
+                throw new ApplicationException("You don't have permission to the ");
+            }
         }
 
         public Post Get(int id)
@@ -45,13 +55,31 @@ namespace CS321_W5D2_BlogAPI.Core.Services
         {
             var post = this.Get(id);
             // TODO: prevent user from deleting from a blog that isn't theirs
-            _postRepository.Remove(id);
+            var currentId = _userService.CurrentUserId;
+            var blog = _blogRepository.Get(post.BlogId);
+            if (currentId == blog.UserId)
+            {
+                _postRepository.Remove(id);
+            }
+            else
+            {
+                throw new Exception("You don't have permission to remove this post");
+            }
         }
 
         public Post Update(Post updatedPost)
         {
             // TODO: prevent user from updating a blog that isn't theirs
-            return _postRepository.Update(updatedPost);
+            var currentUserId = _userService.CurrentUserId;
+            var blog = _blogRepository.Get(updatedPost.BlogId);
+            if (currentUserId == blog.UserId)
+            {
+                return _postRepository.Update(updatedPost);
+            }
+            else
+            {
+                throw new Exception("This is NOT your blog! >:( ");
+            }
         }
 
     }
